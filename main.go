@@ -14,12 +14,11 @@ import (
 
 func init() {
 	gotenv.Load()
-	mongoLoad()
 }
 func main() {
 	//Request routing
 	router := mux.NewRouter()
-	router.HandleFunc("/hello", hello).Methods("GET")
+	router.HandleFunc("/", hello).Methods("GET")
 	//Start the engines
 	portPtr := flag.String("p", "3333", "Server Port")
 	flag.Parse()
