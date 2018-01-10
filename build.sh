@@ -1,0 +1,3 @@
+#!/bin/bash
+echo Building Linux Version...
+go build -o tasktalk.sh
