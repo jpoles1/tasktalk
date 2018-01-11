@@ -19,6 +19,7 @@ func main() {
 	//Request routing
 	router := mux.NewRouter()
 	router.HandleFunc("/", hello).Methods("GET").Queries("hub.challenge", "{hub.challenge}")
+	router.HandleFunc("/", receiveMsg).Methods("POST")
 	//Start the engines
 	portPtr := flag.String("p", "3333", "Server Port")
 	flag.Parse()
