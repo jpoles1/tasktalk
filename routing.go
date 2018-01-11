@@ -45,6 +45,10 @@ type ReplyButton struct {
 	Payload     string `json:"payload"`
 	ImageURL    string `json:"image_url"`
 }
+
+var cancelButton ReplyButton = ReplyButton{"text", "Cancel", "cancel", ""}
+var addTaskButton ReplyButton = ReplyButton{"text", "Add Task", "addTask", ""}
+
 type OutgoingMessage struct {
 	Recipient struct {
 		ID string `json:"id"`
@@ -71,13 +75,31 @@ func receiveMsg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("Message Data:", postData)
+	senderID := postData.Entry[0].Messaging[0].Sender.ID
 	msgText := postData.Entry[0].Messaging[0].Message.Text
-	recipientID := postData.Entry[0].Messaging[0].Sender.ID
-	if msgText != "" {
+	if val, ok := userStates[senderID]; ok && val.state != "base" && msgText != "" {
+		if val.state == "addTask" {
+			if msgText == "Cancel" {
+				setUserState(senderID, "base")
+				sendMsg(senderID, "Ok, nevermind. What would you like to do now?", []ReplyButton{addTaskButton})
+			} else {
+				setUserState(senderID, "base")
+				sendMsg(senderID, "Ok, adding your task: "+msgText, []ReplyButton{addTaskButton})
+			}
+		}
+	} else if msgText == "Add Task" {
+		setUserState(senderID, "addTask")
+		sendMsg(senderID, "What task can I add to your list?", []ReplyButton{cancelButton})
+	} else if msgText == "Cancel" {
+		setUserState(senderID, "base")
+		sendMsg(senderID, "Ok, nevermind. What would you like to do now?", []ReplyButton{addTaskButton})
+	} else if msgText != "" {
 		msgText = "Echo: " + msgText
-		sendMsg(recipientID, msgText)
+		//Quick reply buttons
+		sendMsg(senderID, msgText, []ReplyButton{addTaskButton})
 	} else {
 		var postData interface{}
+		log.Println("Unknown Message Format!")
 		decoder := json.NewDecoder(r.Body)
 		err := decoder.Decode(&postData)
 		if err != nil {
@@ -102,18 +124,15 @@ func sendJSON(jsonData []byte) {
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
+	fmt.Println("Response Status:", resp.Status)
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("response Body:", string(body))
+	fmt.Println("Response Body:", string(body))
 }
-func sendMsg(recipientID string, msgText string) {
+func sendMsg(recipientID string, msgText string, replyButtons []ReplyButton) {
 	msgData := OutgoingMessage{}
 	msgData.Recipient.ID = recipientID
 	msgData.Message.Text = msgText
-	//Quick reply buttons
-	addTaskButton := ReplyButton{"text", "Add Task", "addTexts", ""}
-	msgData.Message.ReplyButtons = []ReplyButton{addTaskButton}
+	msgData.Message.ReplyButtons = replyButtons
 	jsonData, _ := json.Marshal(msgData)
 	sendJSON(jsonData)
 }
