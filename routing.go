@@ -10,5 +10,5 @@ import (
 func hello(w http.ResponseWriter, r *http.Request) {
 	urlparams := mux.Vars(r)
 	log.Println(r, urlparams)
-	w.Write([]byte("Hello World!"))
+	w.Write([]byte(urlparams["hub.challenge"]))
 }

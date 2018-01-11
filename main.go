@@ -18,7 +18,7 @@ func init() {
 func main() {
 	//Request routing
 	router := mux.NewRouter()
-	router.HandleFunc("/", hello).Methods("GET")
+	router.HandleFunc("/", hello).Methods("GET").Queries("hub.challenge", "{hub.challenge}")
 	//Start the engines
 	portPtr := flag.String("p", "3333", "Server Port")
 	flag.Parse()
