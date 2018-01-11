@@ -20,6 +20,7 @@ func init() {
 	if fbToken == "" {
 		log.Fatal("No FB Access Token supplied in .env config file!")
 	}
+	dbLoad()
 }
 func main() {
 	//Request routing

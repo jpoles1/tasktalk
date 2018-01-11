@@ -46,8 +46,11 @@ type ReplyButton struct {
 	ImageURL    string `json:"image_url"`
 }
 
-var cancelButton ReplyButton = ReplyButton{"text", "Cancel", "cancel", ""}
-var addTaskButton ReplyButton = ReplyButton{"text", "Add Task", "addTask", ""}
+var addTaskButton = ReplyButton{"text", "Add Task", "addTask", ""}
+var getTasksButton = ReplyButton{"text", "Get Tasks", "getTasks", ""}
+var cancelButton = ReplyButton{"text", "Cancel", "cancel", ""}
+
+var baseButtons = []ReplyButton{addTaskButton, getTasksButton}
 
 type OutgoingMessage struct {
 	Recipient struct {
@@ -78,25 +81,26 @@ func receiveMsg(w http.ResponseWriter, r *http.Request) {
 	senderID := postData.Entry[0].Messaging[0].Sender.ID
 	msgText := postData.Entry[0].Messaging[0].Message.Text
 	if val, ok := userStates[senderID]; ok && val.state != "base" && msgText != "" {
-		if val.state == "addTask" {
-			if msgText == "Cancel" {
-				setUserState(senderID, "base")
-				sendMsg(senderID, "Ok, nevermind. What would you like to do now?", []ReplyButton{addTaskButton})
-			} else {
-				setUserState(senderID, "base")
-				sendMsg(senderID, "Ok, adding your task: "+msgText, []ReplyButton{addTaskButton})
-			}
+		if msgText == "Cancel" {
+			setUserState(senderID, "base")
+			sendMsg(senderID, "Ok, nevermind. What would you like to do now?", baseButtons)
+		} else if val.state == "addTask" {
+			setUserState(senderID, "base")
+			dbAddTask(senderID, msgText)
+			sendMsg(senderID, "Ok, adding your task: "+msgText, baseButtons)
 		}
 	} else if msgText == "Add Task" {
 		setUserState(senderID, "addTask")
 		sendMsg(senderID, "What task can I add to your list?", []ReplyButton{cancelButton})
+	} else if msgText == "Get Tasks" {
+		sendMsg(senderID, dbFetchTasks(senderID), baseButtons)
 	} else if msgText == "Cancel" {
 		setUserState(senderID, "base")
-		sendMsg(senderID, "Ok, nevermind. What would you like to do now?", []ReplyButton{addTaskButton})
+		sendMsg(senderID, "Ok, nevermind. What would you like to do now?", baseButtons)
 	} else if msgText != "" {
 		msgText = "Echo: " + msgText
 		//Quick reply buttons
-		sendMsg(senderID, msgText, []ReplyButton{addTaskButton})
+		sendMsg(senderID, msgText, baseButtons)
 	} else {
 		var postData interface{}
 		log.Println("Unknown Message Format!")
@@ -111,10 +115,8 @@ func receiveMsg(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("ok"))
 }
 
-func sendJSON(jsonData []byte) {
-	url := "https://graph.facebook.com/v2.6/me/messages?access_token=" + fbToken
+func sendJSON(url string, jsonData []byte) {
 	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	req.Header.Set("X-Custom-Header", "myvalue")
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
@@ -134,5 +136,6 @@ func sendMsg(recipientID string, msgText string, replyButtons []ReplyButton) {
 	msgData.Message.Text = msgText
 	msgData.Message.ReplyButtons = replyButtons
 	jsonData, _ := json.Marshal(msgData)
-	sendJSON(jsonData)
+	url := "https://graph.facebook.com/v2.6/me/messages?access_token=" + fbToken
+	sendJSON(url, jsonData)
 }
