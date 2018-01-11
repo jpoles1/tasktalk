@@ -25,12 +25,15 @@ func setUserState(userID string, newState string) {
 	currentState.state = newState
 	currentState.stateLock.Unlock()
 	userStates[userID] = currentState
-	go func() {
-		select {
-		case _ = <-currentState.timeoutChannel:
-			sendMsg(userID, "Ok, nevermind. What would you like to do now?", baseButtons)
-		case <-time.After(time.Minute * 1):
-			setUserState(userID, "base")
-		}
-	}()
+	if newState != "base" {
+		go func() {
+			select {
+			case _ = <-currentState.timeoutChannel:
+				setUserState(userID, "base")
+			case <-time.After(time.Minute * 1):
+				sendMsg(userID, "Ok, nevermind (timeout). What would you like to do now?", baseButtons)
+				setUserState(userID, "base")
+			}
+		}()
+	}
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -10,6 +11,7 @@ import (
 )
 
 type UserTask struct {
+	TaskID   bson.ObjectId `bson:"_id"`
 	UserID   string
 	TaskText string
 }
@@ -30,13 +32,29 @@ func dbLoad() {
 }
 
 func dbAddTask(userID string, taskText string) {
-	newTask := UserTask{userID, taskText}
+	newTask := UserTask{bson.NewObjectId(), userID, taskText}
 	mongoSesh := mongoDB.Copy()
 	defer mongoSesh.Close()
 	err := mongoSesh.DB("heroku_r47fhcrt").C("tasks").Insert(newTask)
 	if err != nil {
-		fmt.Println("Failure to insert account document:\n", err)
+		fmt.Println("Failure to insert task document:\n", err)
 	}
+	userStates[userID].timeoutChannel <- true
+}
+func dbDeleteTask(userID string, taskIndex int) error {
+	mongoSesh := mongoDB.Copy()
+	defer mongoSesh.Close()
+	taskList := dbFetchTasks(userID)
+	if len(taskList) < taskIndex {
+		currentTask := taskList[taskIndex]
+		err := mongoSesh.DB("heroku_r47fhcrt").C("tasks").Remove(bson.M{"_id": currentTask.TaskID})
+		if err != nil {
+			fmt.Println("Failure to insert account document:\n", err)
+		}
+		userStates[userID].timeoutChannel <- true
+		return nil
+	}
+	return errors.New("Invalid Task Index!")
 }
 func dbFetchTasks(userID string) []UserTask {
 	mongoSesh := mongoDB.Copy()

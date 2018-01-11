@@ -66,7 +66,7 @@ type OutgoingMessage struct {
 func formatTaskList(taskList []UserTask) string {
 	taskText := ""
 	for index, task := range taskList {
-		taskText += strconv.Itoa(index) + ") - " + task.TaskText + "\n"
+		taskText += strconv.Itoa(index+1) + ") - " + task.TaskText + "\n"
 	}
 	return taskText
 }
@@ -90,21 +90,20 @@ func receiveMsg(w http.ResponseWriter, r *http.Request) {
 	msgText := postData.Entry[0].Messaging[0].Message.Text
 	if val, ok := userStates[senderID]; ok && val.state != "base" && msgText != "" {
 		if msgText == "Cancel" {
-			setUserState(senderID, "base")
-			sendMsg(senderID, "Ok, nevermind. What would you like to do now?", baseButtons)
+			cancelResponse(senderID)
 		} else if val.state == "addTask" {
-			setUserState(senderID, "base")
-			dbAddTask(senderID, msgText)
-			sendMsg(senderID, "Ok, adding your task: "+msgText, baseButtons)
+			addedTaskResponse(senderID, msgText)
+		} else if val.state == "deleteTask" {
+			deletedTaskResponse(senderID, msgText)
 		}
 	} else if msgText == "Add Task" {
-		setUserState(senderID, "addTask")
-		sendMsg(senderID, "What task can I add to your list?", []ReplyButton{cancelButton})
+		addingTaskResponse(senderID)
+	} else if msgText == "Delete Task" {
+		deletingTaskResponse(senderID)
 	} else if msgText == "Get Tasks" {
-		sendMsg(senderID, formatTaskList(dbFetchTasks(senderID)), baseButtons)
+		getTasksResponse(senderID)
 	} else if msgText == "Cancel" {
-		setUserState(senderID, "base")
-		sendMsg(senderID, "Ok, nevermind. What would you like to do now?", baseButtons)
+		cancelResponse(senderID)
 	} else if msgText != "" {
 		msgText = "Echo: " + msgText
 		//Quick reply buttons
