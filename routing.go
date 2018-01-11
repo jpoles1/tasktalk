@@ -16,24 +16,29 @@ func hello(w http.ResponseWriter, r *http.Request) {
 
 //IncomingMessage contains the data from a facebook message
 type IncomingMessage struct {
-	entry []struct {
-		messaging []struct {
-			message struct {
-				text string
-			}
-			timestamp string
-			sender    struct {
-				id string
-			}
-			recipient struct {
-				id string
-			}
-		}
-	}
+	Object string `json:"object"`
+	Entry  []struct {
+		Messaging []struct {
+			Message struct {
+				Text string `json:"text"`
+				Seq  int    `json:"seq"`
+				Mid  string `json:"mid"`
+			} `json:"message"`
+			Timestamp int64 `json:"timestamp"`
+			Sender    struct {
+				ID string `json:"id"`
+			} `json:"sender"`
+			Recipient struct {
+				ID string `json:"id"`
+			} `json:"recipient"`
+		} `json:"messaging"`
+		Time int64  `json:"time"`
+		ID   string `json:"id"`
+	} `json:"entry"`
 }
 
 func receiveMsg(w http.ResponseWriter, r *http.Request) {
-	var postData []IncomingMessage
+	var postData IncomingMessage
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&postData)
 	if err != nil {
