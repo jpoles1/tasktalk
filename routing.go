@@ -39,13 +39,19 @@ type IncomingMessage struct {
 		ID   string `json:"id"`
 	} `json:"entry"`
 }
-
+type ReplyButton struct {
+	ContentType string `json:"content_type"`
+	Title       string `json:"title"`
+	Payload     string `json:"payload"`
+	ImageURL    string `json:"image_url"`
+}
 type OutgoingMessage struct {
 	Recipient struct {
 		ID string `json:"id"`
 	} `json:"recipient"`
 	Message struct {
-		Text string `json:"text"`
+		Text         string        `json:"text"`
+		ReplyButtons []ReplyButton `json:"quick_replies"`
 	} `json:"message"`
 }
 
@@ -67,14 +73,25 @@ func receiveMsg(w http.ResponseWriter, r *http.Request) {
 	log.Println("Message Data:", postData)
 	msgText := postData.Entry[0].Messaging[0].Message.Text
 	recipientID := postData.Entry[0].Messaging[0].Sender.ID
-	msgText = "Echo:" + msgText
-	sendMsg(recipientID, msgText)
+	if msgText != "" {
+		msgText = "Echo: " + msgText
+		sendMsg(recipientID, msgText)
+	} else {
+		var postData interface{}
+		decoder := json.NewDecoder(r.Body)
+		err := decoder.Decode(&postData)
+		if err != nil {
+			panic(err)
+		}
+		log.Println("Raw Data:", r.Body)
+		log.Println("Message Data:", postData)
+	}
 	w.Write([]byte("ok"))
 }
 
 func sendJSON(jsonData []byte) {
 	url := "https://graph.facebook.com/v2.6/me/messages?access_token=" + fbToken
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	req.Header.Set("X-Custom-Header", "myvalue")
 	req.Header.Set("Content-Type", "application/json")
 
@@ -92,8 +109,11 @@ func sendJSON(jsonData []byte) {
 }
 func sendMsg(recipientID string, msgText string) {
 	msgData := OutgoingMessage{}
-	msgData.Message.Text = msgText
 	msgData.Recipient.ID = recipientID
+	msgData.Message.Text = msgText
+	//Quick reply buttons
+	addTaskButton := ReplyButton{"text", "Add Task", "addTexts", ""}
+	msgData.Message.ReplyButtons = []ReplyButton{addTaskButton}
 	jsonData, _ := json.Marshal(msgData)
 	sendJSON(jsonData)
 }
