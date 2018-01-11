@@ -2,6 +2,13 @@ package main
 
 import "strconv"
 
+var addTaskButton = ReplyButton{"text", "Add Task", "addTask", ""}
+var getTasksButton = ReplyButton{"text", "Get Tasks", "getTasks", ""}
+var deleteTaskButton = ReplyButton{"text", "Delete Task", "addTask", ""}
+var cancelButton = ReplyButton{"text", "Cancel", "cancel", ""}
+
+var baseButtons = []ReplyButton{addTaskButton, getTasksButton, deleteTaskButton}
+
 func cancelResponse(recipientID string) {
 	setUserState(recipientID, "base")
 	sendMsg(recipientID, "Ok, nevermind. What would you like to do now?", baseButtons)

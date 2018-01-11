@@ -47,12 +47,6 @@ type ReplyButton struct {
 	ImageURL    string `json:"image_url"`
 }
 
-var addTaskButton = ReplyButton{"text", "Add Task", "addTask", ""}
-var getTasksButton = ReplyButton{"text", "Get Tasks", "getTasks", ""}
-var cancelButton = ReplyButton{"text", "Cancel", "cancel", ""}
-
-var baseButtons = []ReplyButton{addTaskButton, getTasksButton}
-
 type OutgoingMessage struct {
 	Recipient struct {
 		ID string `json:"id"`
