@@ -12,8 +12,14 @@ import (
 	"github.com/subosito/gotenv"
 )
 
+var fbToken string
+
 func init() {
 	gotenv.Load()
+	fbToken = os.Getenv("PAGE_ACCESS_TOKEN")
+	if fbToken == "" {
+		log.Fatal("No FB Access Token supplied in .env config file!")
+	}
 }
 func main() {
 	//Request routing

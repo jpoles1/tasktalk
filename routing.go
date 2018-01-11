@@ -66,14 +66,14 @@ func receiveMsg(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("Message Data:", postData)
 	msgText := postData.Entry[0].Messaging[0].Message.Text
-	recipientID := postData.Entry[0].Messaging[0].Recipient.ID
+	recipientID := postData.Entry[0].Messaging[0].Sender.ID
 	msgText = "Echo:" + msgText
 	sendMsg(recipientID, msgText)
 	w.Write([]byte("ok"))
 }
 
 func sendJSON(jsonData []byte) {
-	url := "https://graph.facebook.com/v2.6/me/messages"
+	url := "https://graph.facebook.com/v2.6/me/messages?access_token=" + fbToken
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	req.Header.Set("X-Custom-Header", "myvalue")
 	req.Header.Set("Content-Type", "application/json")
