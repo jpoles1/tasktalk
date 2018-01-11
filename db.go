@@ -38,10 +38,10 @@ func dbAddTask(userID string, taskText string) {
 		fmt.Println("Failure to insert account document:\n", err)
 	}
 }
-func dbFetchTasks(userID string) string {
+func dbFetchTasks(userID string) []UserTask {
 	mongoSesh := mongoDB.Copy()
 	defer mongoSesh.Close()
 	var taskList []UserTask
 	mongoSesh.DB("heroku_r47fhcrt").C("tasks").Find(bson.M{"userid": userID}).All(&taskList)
-	return fmt.Sprintln(taskList)
+	return taskList
 }

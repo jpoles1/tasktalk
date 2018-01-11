@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -62,6 +63,13 @@ type OutgoingMessage struct {
 	} `json:"message"`
 }
 
+func formatTaskList(taskList []UserTask) string {
+	taskText := ""
+	for index, task := range taskList {
+		taskText += strconv.Itoa(index) + ") - " + task.TaskText + "\n"
+	}
+	return taskText
+}
 func receiveMsg(w http.ResponseWriter, r *http.Request) {
 	var postData IncomingMessage
 	decoder := json.NewDecoder(r.Body)
@@ -93,7 +101,7 @@ func receiveMsg(w http.ResponseWriter, r *http.Request) {
 		setUserState(senderID, "addTask")
 		sendMsg(senderID, "What task can I add to your list?", []ReplyButton{cancelButton})
 	} else if msgText == "Get Tasks" {
-		sendMsg(senderID, dbFetchTasks(senderID), baseButtons)
+		sendMsg(senderID, formatTaskList(dbFetchTasks(senderID)), baseButtons)
 	} else if msgText == "Cancel" {
 		setUserState(senderID, "base")
 		sendMsg(senderID, "Ok, nevermind. What would you like to do now?", baseButtons)
