@@ -44,6 +44,15 @@ func receiveMsg(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-
+	if len(postData.Entry) < 1 {
+		log.Println("Error: Malformed Request")
+		return
+	}
+	if len(postData.Entry[0].Messaging) < 1 {
+		log.Println("Error: Malformed Request")
+		return
+	}
 	log.Println("Message Data:", postData)
+	msgText := postData.Entry[0].Messaging[0].Message.Text
+	w.Write([]byte("Echo: " + msgText))
 }
