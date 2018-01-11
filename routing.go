@@ -40,6 +40,8 @@ type IncomingMessage struct {
 		ID   string `json:"id"`
 	} `json:"entry"`
 }
+
+//ReplyButton contains the data for a quick-reply button to be included in an OutgoingMessage
 type ReplyButton struct {
 	ContentType string `json:"content_type"`
 	Title       string `json:"title"`
@@ -47,6 +49,7 @@ type ReplyButton struct {
 	ImageURL    string `json:"image_url"`
 }
 
+//OutgoingMessage contains the data included in a facebook message
 type OutgoingMessage struct {
 	Recipient struct {
 		ID string `json:"id"`
@@ -95,7 +98,7 @@ func receiveMsg(w http.ResponseWriter, r *http.Request) {
 	} else if msgText == "Delete Task" {
 		deletingTaskResponse(senderID)
 	} else if msgText == "Get Tasks" {
-		getTasksResponse(senderID)
+		getTasksResponse(senderID, baseButtons)
 	} else if msgText == "Cancel" {
 		cancelResponse(senderID)
 	} else if msgText != "" {

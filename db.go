@@ -10,6 +10,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+//UserTask represents a task entry in the MongoDB
 type UserTask struct {
 	TaskID   bson.ObjectId `bson:"_id"`
 	UserID   string
@@ -42,10 +43,11 @@ func dbAddTask(userID string, taskText string) {
 	userStates[userID].timeoutChannel <- true
 }
 func dbDeleteTask(userID string, taskIndex int) error {
+	taskIndex = taskIndex - 1
 	mongoSesh := mongoDB.Copy()
 	defer mongoSesh.Close()
 	taskList := dbFetchTasks(userID)
-	if len(taskList) < taskIndex {
+	if taskIndex < len(taskList) {
 		currentTask := taskList[taskIndex]
 		err := mongoSesh.DB("heroku_r47fhcrt").C("tasks").Remove(bson.M{"_id": currentTask.TaskID})
 		if err != nil {
@@ -54,7 +56,7 @@ func dbDeleteTask(userID string, taskIndex int) error {
 		userStates[userID].timeoutChannel <- true
 		return nil
 	}
-	return errors.New("Invalid Task Index!")
+	return errors.New("Invalid task index")
 }
 func dbFetchTasks(userID string) []UserTask {
 	mongoSesh := mongoDB.Copy()

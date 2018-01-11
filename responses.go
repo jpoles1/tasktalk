@@ -14,8 +14,8 @@ func cancelResponse(recipientID string) {
 	sendMsg(recipientID, "Ok, nevermind. What would you like to do now?", baseButtons)
 }
 
-func getTasksResponse(recipientID string) {
-	sendMsg(recipientID, formatTaskList(dbFetchTasks(recipientID)), baseButtons)
+func getTasksResponse(recipientID string, buttonList []ReplyButton) {
+	sendMsg(recipientID, formatTaskList(dbFetchTasks(recipientID)), buttonList)
 }
 
 //Adding tasks
@@ -27,12 +27,14 @@ func addedTaskResponse(recipientID string, msgText string) {
 	setUserState(recipientID, "base")
 	dbAddTask(recipientID, msgText)
 	sendMsg(recipientID, "Ok, adding your task: "+msgText, baseButtons)
+	getTasksResponse(recipientID, []ReplyButton{})
 }
 
 //Deleting tasks
 func deletingTaskResponse(recipientID string) {
 	setUserState(recipientID, "deleteTask")
 	sendMsg(recipientID, "What task should I delete (enter the task #)?", []ReplyButton{cancelButton})
+	getTasksResponse(recipientID, []ReplyButton{})
 }
 func deletedTaskResponse(recipientID string, msgText string) {
 	if msgIndex, err := strconv.Atoi(msgText); err == nil {
@@ -40,7 +42,6 @@ func deletedTaskResponse(recipientID string, msgText string) {
 		if err == nil {
 			setUserState(recipientID, "base")
 			sendMsg(recipientID, "Ok, deleting task #"+msgText, baseButtons)
-			getTasksResponse(recipientID)
 		} else {
 			sendMsg(recipientID, "Error: invalid task #!", baseButtons)
 		}
