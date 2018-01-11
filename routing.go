@@ -33,7 +33,7 @@ type IncomingMessage struct {
 }
 
 func receiveMsg(w http.ResponseWriter, r *http.Request) {
-	var postData interface{}
+	var postData []IncomingMessage
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&postData)
 	if err != nil {
