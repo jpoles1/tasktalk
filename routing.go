@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -14,6 +15,11 @@ func hello(w http.ResponseWriter, r *http.Request) {
 }
 
 func receiveMsg(w http.ResponseWriter, r *http.Request) {
-	log.Println(r)
-	log.Println("post data:", r.Body)
+	var postData interface{}
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&postData)
+	if err != nil {
+		panic(err)
+	}
+	log.Println("post data:", postData)
 }
