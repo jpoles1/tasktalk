@@ -14,12 +14,31 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(urlparams["hub.challenge"]))
 }
 
+//IncomingMessage contains the data from a facebook message
+type IncomingMessage struct {
+	entry []struct {
+		messaging []struct {
+			message struct {
+				text string
+			}
+			timestamp string
+			sender    struct {
+				id string
+			}
+			recipient struct {
+				id string
+			}
+		}
+	}
+}
+
 func receiveMsg(w http.ResponseWriter, r *http.Request) {
-	var postData interface{}
+	var postData IncomingMessage
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&postData)
 	if err != nil {
 		panic(err)
 	}
-	log.Println("post data:", postData)
+	log.Println("Message Data:", postData)
+	log.Println("Message Text:", postData.entry[0].messaging[0].message.text)
 }
