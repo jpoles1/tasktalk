@@ -98,15 +98,8 @@ func receiveMsg(w http.ResponseWriter, r *http.Request) {
 		//Quick reply buttons
 		sendMsg(senderID, msgText, baseButtons)
 	} else {
-		var postData interface{}
 		log.Println("Unknown Message Format!")
-		decoder := json.NewDecoder(r.Body)
-		err := decoder.Decode(&postData)
-		if err != nil {
-			panic(err)
-		}
 		log.Println("Raw Data:", r.Body)
-		log.Println("Message Data:", postData)
 	}
 	w.Write([]byte("ok"))
 }
