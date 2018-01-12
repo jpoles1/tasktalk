@@ -34,7 +34,7 @@ func addedTaskResponse(recipientID string, msgText string) {
 	setUserState(recipientID, "base")
 	dbAddTask(recipientID, msgText)
 	sendMsg(recipientID, "Ok, adding your task: "+msgText, baseButtons)
-	getTasksResponse(recipientID, []ReplyButton{})
+	getTasksResponse(recipientID, baseButtons)
 }
 
 //Deleting tasks

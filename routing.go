@@ -55,7 +55,7 @@ type OutgoingMessage struct {
 	} `json:"recipient"`
 	Message struct {
 		Text         string        `json:"text"`
-		ReplyButtons []ReplyButton `json:"quick_replies"`
+		ReplyButtons []ReplyButton `json:"quick_replies,omitempty"`
 	} `json:"message"`
 }
 
