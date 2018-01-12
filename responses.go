@@ -11,6 +11,7 @@ var baseButtons = []ReplyButton{addTaskButton, getTasksButton, deleteTaskButton}
 
 func cancelResponse(recipientID string) {
 	setUserState(recipientID, "base")
+	userStates[recipientID].timeoutChannel <- true
 	sendMsg(recipientID, "Ok, nevermind. What would you like to do now?", baseButtons)
 }
 
