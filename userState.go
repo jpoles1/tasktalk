@@ -30,7 +30,7 @@ func setUserState(userID string, newState string) {
 			select {
 			case _ = <-currentState.timeoutChannel:
 				setUserState(userID, "base")
-			case <-time.After(time.Minute * 1):
+			case <-time.After(time.Minute * 30):
 				sendMsg(userID, "Ok, nevermind (timeout). What would you like to do now?", baseButtons)
 				setUserState(userID, "base")
 			}
