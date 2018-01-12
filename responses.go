@@ -50,8 +50,9 @@ func deletedTaskResponse(recipientID string, msgText string) {
 		if err == nil {
 			setUserState(recipientID, "base")
 			sendMsg(recipientID, "Ok, deleting task #"+msgText, baseButtons)
+			getTasksResponse(recipientID, baseButtons)
 		} else {
-			sendMsg(recipientID, "Error: invalid task #!", baseButtons)
+			sendMsg(recipientID, "Error: invalid task #!", []ReplyButton{cancelButton})
 		}
 	} else {
 		sendMsg(recipientID, "Error: response was not a #!", []ReplyButton{cancelButton})
