@@ -14,6 +14,13 @@ func cancelResponse(recipientID string) {
 	sendMsg(recipientID, "Ok, nevermind. What would you like to do now?", baseButtons)
 }
 
+func formatTaskList(taskList []UserTask) string {
+	taskText := "Task List:\n"
+	for index, task := range taskList {
+		taskText += strconv.Itoa(index+1) + ") - " + task.TaskText + "\n"
+	}
+	return taskText
+}
 func getTasksResponse(recipientID string, buttonList []ReplyButton) {
 	sendMsg(recipientID, formatTaskList(dbFetchTasks(recipientID)), buttonList)
 }
@@ -33,8 +40,8 @@ func addedTaskResponse(recipientID string, msgText string) {
 //Deleting tasks
 func deletingTaskResponse(recipientID string) {
 	setUserState(recipientID, "deleteTask")
-	sendMsg(recipientID, "What task should I delete (enter the task #)?", []ReplyButton{cancelButton})
 	getTasksResponse(recipientID, []ReplyButton{})
+	sendMsg(recipientID, "What task should I delete (enter the task #)?", []ReplyButton{cancelButton})
 }
 func deletedTaskResponse(recipientID string, msgText string) {
 	if msgIndex, err := strconv.Atoi(msgText); err == nil {

@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -60,13 +59,6 @@ type OutgoingMessage struct {
 	} `json:"message"`
 }
 
-func formatTaskList(taskList []UserTask) string {
-	taskText := ""
-	for index, task := range taskList {
-		taskText += strconv.Itoa(index+1) + ") - " + task.TaskText + "\n"
-	}
-	return taskText
-}
 func receiveMsg(w http.ResponseWriter, r *http.Request) {
 	var postData IncomingMessage
 	decoder := json.NewDecoder(r.Body)
