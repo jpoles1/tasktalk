@@ -33,7 +33,7 @@ func addingTaskResponse(recipientID string) {
 func addedTaskResponse(recipientID string, msgText string) {
 	setUserState(recipientID, "base")
 	dbAddTask(recipientID, msgText)
-	sendMsg(recipientID, "Ok, adding your task: "+msgText, baseButtons)
+	sendMsg(recipientID, "Ok, adding your task:\n"+msgText, baseButtons)
 	getTasksResponse(recipientID, baseButtons)
 }
 

@@ -25,6 +25,7 @@ func init() {
 func main() {
 	//Request routing
 	router := mux.NewRouter()
+	router.PathPrefix("/res").Handler(http.StripPrefix("/res", http.FileServer(http.Dir("res/"))))
 	router.HandleFunc("/", hello).Methods("GET").Queries("hub.challenge", "{hub.challenge}")
 	router.HandleFunc("/", receiveMsg).Methods("POST")
 	//Start the engines
